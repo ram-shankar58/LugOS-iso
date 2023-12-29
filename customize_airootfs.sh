@@ -18,7 +18,7 @@ confirm() {
         * ) echo "Aborted."; exit;;
     esac
 }
-
+  
 # Change ownership of .xinitrc
 chown lugos:lugos /home/lugos/.xinitrc
 
