@@ -5,6 +5,66 @@ pacman -Syuu
 pipx ensurepath > /dev/null
 source ~/.bashrc
 yay -S gnome-extensions-cli --noconfirm
+#!/bin/bash
+
+# Exit on error
+set -e
+
+# Function for interactive confirmation
+confirm() {
+    read -p "Do you want to continue? (y/n): " choice
+    case "$choice" in
+        y|Y ) echo "Proceeding...";;
+        * ) echo "Aborted."; exit;;
+    esac
+}
+
+# Change ownership of .xinitrc
+chown lugos:lugos /home/lugos/.xinitrc
+
+# Initialize and populate pacman keyring
+pacman-key --init
+pacman-key --populate archlinux
+
+# Update the system
+pacman -Syuu
+
+# Set up pipx
+pipx ensurepath > /dev/null
+
+# Source bashrc
+source ~/.bashrc
+
+# Install GNOME extensions CLI
+yay -S gnome-extensions-cli --noconfirm
+
+# ... (your existing script)
+
+# GRUB theme setup
+mkdir -p /usr/share/grub/themes/
+
+if [ ! -d "/var/tmp/LUGOS-grub" ]; then
+  git clone https://github.com/lugvitc/LUGOS-grub.git /var/tmp/LUGOS-grub
+  sudo cp /var/tmp/LUGOS-grub/LUGOS-grub -r /usr/share/grub/themes/
+fi
+
+echo GRUB_THEME="./airootfs/usr/share/grub/themes/LUGOS-grub/theme.txt" | sudo tee -a /etc/default/grub
+sudo grub-mkconfig -o /boot/grub/grub.cfg
+
+# ... (your existing script)
+
+# Enable GNOME extensions
+gsettings set org.gnome.shell disable-user-extensions false
+
+# Clean up
+yay -S libadwaita-without-adwaita-git --noconfirm --needed
+yay -Rns $(yay -Qtdq) --noconfirm
+sudo pacman -S neovim nodejs npm --noconfirm --needed
+git clone https://github.com/lugvitc/LUGOS-nvim-config.git ~/.config/nvim
+
+# Logging
+./your_script.sh > installation_log.txt 2>&1
+
 # pipx install gnome-extensions-cli > /dev/null
 : << COMMENT
 pipx runpip gnome-extensions-cli install pygobject > /dev/null
